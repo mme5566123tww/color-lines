@@ -13,24 +13,59 @@
   --gold:#f2b705; --royal:#b3203a; --tile:#e7e9ec; --tile2:#d3d7dc; --grout:#a5acb6;
   --display:"Lilita One","Noto Sans TC",system-ui,sans-serif;
   --body:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
-  --cw:clamp(44px,12vw,90px); --ch:calc(var(--cw)*1.25);
+  --cw:clamp(42px,13vw,90px); --ch:calc(var(--cw)*1.25);
   color-scheme:dark;
 }
-html,body{background:var(--bg);color:var(--ink)}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--ink);margin:0}
 body{font-family:var(--body);padding-inline:16px;padding-block:20px 32px;
   background:radial-gradient(ellipse at 50% -10%,#33405e 0,var(--bg) 60%) var(--bg);min-height:100%}
 .wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 h1{margin:0;font:900 clamp(22px,5vw,32px)/1.1 var(--body);text-align:center;text-wrap:balance;letter-spacing:.02em}
 h1 span{font-family:var(--display);font-weight:400;color:var(--gold);letter-spacing:.04em}
-.stage{display:grid;grid-template-columns:minmax(54px,120px) minmax(0,480px) minmax(54px,120px);gap:8px;justify-content:center}
+.stage{display:grid;grid-template-columns:clamp(50px,15vw,120px) minmax(0,480px) clamp(50px,15vw,120px);gap:6px;justify-content:center;
+  grid-template-areas:"khud next mhud" "klane board mlane" ". powers ."}
+.powers{grid-area:powers;display:flex;justify-content:flex-end;gap:12px;padding-top:4px}
+.pw{position:relative;width:58px;padding:7px 0 5px;border-radius:12px;background:var(--bg2);border:1.5px solid #4a5672;color:var(--ink);
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font:500 11px/1.2 var(--body);transition:transform .15s,filter .3s,opacity .3s}
+.pw svg{width:30px;height:30px;display:block}
+.pw:hover:not(.empty){transform:translateY(-2px);border-color:var(--gold)}
+.pw:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.pw .cnt{position:absolute;top:-8px;right:-8px;min-width:21px;height:21px;padding:0 5px;border-radius:11px;background:#e0263f;color:#fff;
+  font:400 13px/21px var(--display);text-align:center;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.pw.empty{filter:grayscale(1);opacity:.4;cursor:not-allowed}
+.pw.empty .cnt{background:#6b6b6b}
+.pw.nope{animation:shake .35s}
+.cell{position:relative}
+.cell.boom{animation:boom .45s ease-out}
+@keyframes boom{0%{background:#fff3b0;box-shadow:inset 0 0 0 40px #ffb02e}100%{box-shadow:inset 0 0 0 0 #ff6a00}}
+.cell.zap{background:#fffbe0}
+.cell.zap::after{content:"";position:absolute;inset:8%;background:#ffd400;
+  clip-path:polygon(58% 0,22% 55%,46% 55%,34% 100%,80% 40%,55% 40%,70% 0);filter:drop-shadow(0 0 4px #fff);animation:zapA .3s steps(2) infinite}
+@keyframes zapA{50%{opacity:.4}}
+.ball.spin{animation:spin .5s ease-out}
+@keyframes spin{from{transform:rotate(-360deg) scale(.4);filter:hue-rotate(180deg)}}
+.hud.king{grid-area:khud}.hud.me{grid-area:mhud}.nextbox{grid-area:next}
+.lane.king{grid-area:klane}.lane.me{grid-area:mlane}.boardwrap{grid-area:board}
+.vs{display:none}
+/* Phone: board takes the full width, the two rivals stand side by side underneath */
+@media (max-width:640px){
+  .stage{grid-template-columns:1fr auto 1fr;gap:10px 8px;
+    grid-template-areas:"khud next mhud" "board board board" "powers powers powers" "klane vs mlane"}
+  .lane{height:190px}
+  .lane .pillar{width:min(58%,74px)}
+  :root{--cw:62px}
+  .vs{display:grid;grid-area:vs;place-items:center;font:400 22px/1 var(--display);color:var(--muted);letter-spacing:.06em}
+}
 .hud{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
 .hud .who{font-size:12px;color:var(--muted);letter-spacing:.08em}
 .hud .num{font:400 clamp(18px,4.6vw,28px)/1 var(--display);font-variant-numeric:tabular-nums}
 .hud.king .num{color:#ff8a9a}
 .hud.me .num{color:#9ef0b0}
 .chip{font-size:10px;font-weight:700;background:var(--gold);color:#3a2a00;border-radius:99px;padding:1px 7px;letter-spacing:.06em}
-.nextbox{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:var(--muted)}
-.nextbox .ball{width:22px;flex:none}
+.nextbox{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:var(--muted);white-space:nowrap;min-width:0}
+.nextbox .ball{width:20px;flex:none}
 .lane{position:relative;min-width:0}
 .pillar{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:58%;
   height:calc(12px + (100% - var(--ch) - 12px) * var(--p,0));
@@ -57,7 +92,7 @@ h1 span{font-family:var(--display);font-weight:400;color:var(--gold);letter-spac
 .float.up{color:#9ef0b0}.float.down{color:#ff8a9a}
 @keyframes rise{from{opacity:1;translate:0 0}to{opacity:0;translate:0 -46px}}
 .boardwrap{position:relative;min-width:0}
-.board{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;padding:4px;background:var(--grout);border-radius:10px;aspect-ratio:1;width:100%;max-width:100%;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.board{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;padding:4px;background:var(--grout);border-radius:10px;aspect-ratio:1;width:100%;max-width:100%;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 .cell{border:0;padding:0;margin:0;border-radius:4px;background:linear-gradient(var(--tile),var(--tile2));display:grid;place-items:center;cursor:pointer;min-width:0;aspect-ratio:1}
 .cell:focus-visible{outline:3px solid var(--gold);outline-offset:-2px}
 .cell.no{animation:no .3s}
@@ -122,11 +157,30 @@ button.btn.ghost[aria-pressed="false"]{color:var(--muted);text-decoration:line-t
     </div>
 
     <div class="boardwrap">
-      <div class="board" id="board" role="grid" aria-label="9×9 棋盤"></div>
+      <div class="board" id="board" role="grid" aria-label="8×8 棋盤"></div>
       <div class="toast" id="toast" hidden></div>
       <div class="over" id="over" hidden><div><span>棋盤滿了，遊戲結束</span><b id="overScore">0</b><span id="overBest"></span><button class="btn" id="again">再玩一次</button></div></div>
     </div>
 
+    <div class="powers" id="powers">
+      <button class="pw" id="pw-bomb" data-k="bomb" aria-label="炸彈：隨機炸掉一塊 3×3 範圍的球">
+        <svg viewBox="0 0 40 40"><circle cx="18" cy="23" r="12" fill="#2b2f3a" stroke="#000"/><circle cx="14" cy="19" r="3" fill="#fff" opacity=".35"/>
+          <rect x="22" y="9" width="7" height="6" rx="1" transform="rotate(40 25 12)" fill="#6b7280"/>
+          <path d="M28 8 Q31 4 34 6" stroke="#b07a3a" stroke-width="2" fill="none"/>
+          <g fill="#ffb02e"><circle cx="35" cy="5" r="3"/></g><circle cx="35" cy="5" r="1.4" fill="#fff6c0"/></svg>
+        炸彈<span class="cnt">3</span>
+      </button>
+      <button class="pw" id="pw-bolt" data-k="bolt" aria-label="閃電：隨機劈掉 1 顆球，連續 3 次">
+        <svg viewBox="0 0 40 40"><path d="M23 2 L8 23 L18 23 L14 38 L32 15 L21 15 L27 2 Z" fill="#ffd400" stroke="#c99a00" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        閃電<span class="cnt">3</span>
+      </button>
+      <button class="pw" id="pw-rainbow" data-k="rainbow" aria-label="彩虹：隨機讓 5 顆球變色">
+        <svg viewBox="0 0 40 40" fill="none" stroke-width="3.2"><path d="M4 30 A16 16 0 0 1 36 30" stroke="#ef4444"/><path d="M8 30 A12 12 0 0 1 32 30" stroke="#facc15"/>
+          <path d="M12 30 A8 8 0 0 1 28 30" stroke="#22c55e"/><path d="M16 30 A4 4 0 0 1 24 30" stroke="#3b82f6"/></svg>
+        彩虹<span class="cnt">3</span>
+      </button>
+    </div>
+    <div class="vs" aria-hidden="true">VS</div>
     <div class="lane me" id="meLane">
       <div class="pillar"></div>
       <div class="char" id="meChar">
@@ -151,11 +205,11 @@ button.btn.ghost[aria-pressed="false"]{color:var(--muted);text-decoration:line-t
   </div>
 
   <div class="bar"><button class="btn" id="restart">重新開始</button><button class="btn ghost" id="musicBtn" aria-pressed="true">♪ 鋼琴音樂</button><button class="btn ghost" id="sfxBtn" aria-pressed="true">音效</button><span>最高分 <b id="best">0</b></span></div>
-  <p class="help">點一顆球選取，再點一個空格，球會沿著通路移動。橫、直、斜任一方向連成 5 顆就會消除：5 顆 +10、6 顆 +20、7 顆 +30。每得一分，平民的柱子升高（100 分升到頂），國王的分數同時扣掉並往下掉。沒有連線的話，會再落下 3 顆新球，棋盤滿了就結束。點一下棋盤，鋼琴音樂就會開始播放。</p>
+  <p class="help">點一顆球選取，再點一個空格，球會沿著通路移動。橫、直、斜任一方向連成 5 顆就會消除：5 顆 +10、6 顆 +20、7 顆 +30。每得一分，平民的柱子升高（100 分升到頂），國王的分數同時扣掉並往下掉。沒有連線的話，會再落下 3 顆新球，棋盤滿了就結束。棋盤右下方有三個道具，每個只能用 3 次：炸彈隨機炸掉一塊 3×3 範圍的球；閃電隨機劈掉 1 顆球，連劈 3 次；彩虹讓隨機 5 顆球變色，剛好變成 5 顆連線也會得分。點一下棋盤，鋼琴音樂就會開始播放。</p>
 </div>
 
 <script>
-const N=9;
+const N=8;
 const COLORS=[['#ef4444','#8f1414'],['#facc15','#a07a00'],['#3b82f6','#163f9a'],['#22c55e','#0f6a2c'],['#a855f7','#5b1d9a'],['#22d3ee','#0b7584']];
 const NAMES=['紅','黃','藍','綠','紫','青'];
 const $=id=>document.getElementById(id);
@@ -172,7 +226,9 @@ for(let i=0;i<N*N;i++){
 }
 const rand=n=>Math.floor(Math.random()*n);
 const rand3=()=>[rand(COLORS.length),rand(COLORS.length),rand(COLORS.length)];
-function fresh(){return{grid:Array(N*N).fill(-1),next:rand3(),score:0,enemy:1000,over:false,fallen:false}}
+const POWER_KEYS=['bomb','bolt','rainbow'];
+const freshPowers=()=>({bomb:3,bolt:3,rainbow:3});
+function fresh(){return{grid:Array(N*N).fill(-1),next:rand3(),score:0,enemy:1000,over:false,fallen:false,powers:freshPowers()}}
 function ballHTML(c,cls=''){const[a,d]=COLORS[c];return`<span class="ball ${cls}" style="--c:${a};--d:${d}" aria-label="${NAMES[c]}球"></span>`}
 function draw(i,cls){const c=S.grid[i];cells[i].innerHTML=c<0?'':ballHTML(c,cls)}
 function drawAll(){for(let i=0;i<N*N;i++)draw(i,i===sel?'sel':'')}
@@ -213,6 +269,7 @@ function linesAt(idxs){
 /* ---------- Audio: synthesized piano BGM + sound effects (Web Audio, no files) ---------- */
 let AC=null,master,musicBus,sfxBus,bgmTimer=null,nextT=0,stepN=0,lastMel=76;
 let musicOn=true,sfxOn=true;
+const MUSIC_VOL=.75,SFX_VOL=1.1;
 try{musicOn=localStorage.getItem('cl-music')!=='0';sfxOn=localStorage.getItem('cl-sfx')!=='0'}catch(e){}
 const mtof=m=>440*Math.pow(2,(m-69)/12);
 function impulse(sec){
@@ -224,18 +281,22 @@ function initAudio(){
   if(AC){if(AC.state==='suspended')AC.resume();return}
   const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
   AC=new C();
-  master=AC.createGain();master.gain.value=.85;
-  const comp=AC.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=3;
-  master.connect(comp).connect(AC.destination);
+  // louder overall: compress, add makeup gain, then a hard limiter so nothing clips
+  master=AC.createGain();master.gain.value=1;
+  const comp=AC.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=10;comp.ratio.value=4;comp.attack.value=.004;comp.release.value=.2;
+  const makeup=AC.createGain();makeup.gain.value=2.2;
+  const limit=AC.createDynamicsCompressor();limit.threshold.value=-1;limit.knee.value=0;limit.ratio.value=20;limit.attack.value=.001;limit.release.value=.08;
+  master.connect(comp).connect(makeup).connect(limit).connect(AC.destination);
   const rev=AC.createConvolver();rev.buffer=impulse(3);
   const revOut=AC.createGain();revOut.gain.value=.5;rev.connect(revOut).connect(master);
   const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2400;lp.Q.value=.3;
-  musicBus=AC.createGain();musicBus.gain.value=musicOn?.5:0;
+  musicBus=AC.createGain();musicBus.gain.value=musicOn?MUSIC_VOL:0;
   musicBus.connect(lp);lp.connect(master);
   const mSend=AC.createGain();mSend.gain.value=.55;lp.connect(mSend).connect(rev);
-  sfxBus=AC.createGain();sfxBus.gain.value=sfxOn?.6:0;sfxBus.connect(master);
+  sfxBus=AC.createGain();sfxBus.gain.value=sfxOn?SFX_VOL:0;sfxBus.connect(master);
   const sSend=AC.createGain();sSend.gain.value=.25;sfxBus.connect(sSend).connect(rev);
   if(musicOn)startBGM();
+  AC.onstatechange=()=>{if(AC.state==='running'&&musicOn&&!bgmTimer)startBGM()};
 }
 // soft piano: a few slightly inharmonic sine partials with a hammer-like attack and natural decay
 function piano(m,t,vel,dur,bus){
@@ -246,7 +307,7 @@ function piano(m,t,vel,dur,bus){
     const n=k+1,o=AC.createOscillator(),g=AC.createGain();
     o.type='sine';o.frequency.value=f*n*(1+.00035*n*n);
     if(k===0)o.detune.value=(Math.random()-.5)*4;
-    const peak=vel*a*(k?bright:1)*.35,dec=dur/(1+.7*k);
+    const peak=vel*a*(k?bright:1)*.6,dec=dur/(1+.7*k);
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+.006);
     g.gain.exponentialRampToValueAtTime(peak*.35,t+.006+Math.min(.25,dec*.15));
     g.gain.exponentialRampToValueAtTime(.0001,t+dec);
@@ -284,8 +345,12 @@ function startBGM(){
   if(!AC||bgmTimer)return;
   nextT=AC.currentTime+.15;
   musicBus.gain.cancelScheduledValues(AC.currentTime);
-  musicBus.gain.setValueAtTime(0,AC.currentTime);musicBus.gain.linearRampToValueAtTime(.5,AC.currentTime+1.5);
-  bgmTimer=setInterval(()=>{while(nextT<AC.currentTime+.3){playStep(nextT);nextT+=EIGHTH}},60);
+  musicBus.gain.setValueAtTime(0,AC.currentTime);musicBus.gain.linearRampToValueAtTime(MUSIC_VOL,AC.currentTime+1.5);
+  bgmTimer=setInterval(()=>{
+    if(AC.state!=='running')return;
+    if(nextT<AC.currentTime)nextT=AC.currentTime+.05;
+    while(nextT<AC.currentTime+.3){playStep(nextT);nextT+=EIGHTH}
+  },60);
 }
 function stopBGM(){
   if(!AC)return;clearInterval(bgmTimer);bgmTimer=null;
@@ -304,19 +369,56 @@ const SFX={
   hurt(){const t=now()+.25;tone(260,t,.4,'triangle',.22,95);tone(130,t,.4,'sine',.18,60)},
   fall(){const t=now()+.3;tone(700,t,1.1,'triangle',.18,80);tone(70,t+1,.6,'sine',.4,40)},
   max(){if(!sfxOn)return;const t=now()+.2;[72,76,79,84].forEach((m,i)=>piano(m,t+i*.09,.6,2,sfxBus))},
-  over(){if(!sfxOn)return;const t=now();[69,65,62,57].forEach((m,i)=>piano(m,t+i*.35,.5,2.2,sfxBus))}
+  over(){if(!sfxOn)return;const t=now();[69,65,62,57].forEach((m,i)=>piano(m,t+i*.35,.5,2.2,sfxBus))},
+  // power-ups: kept in the mid range so phone speakers can play them
+  press(){if(sfxOn)piano(84,now(),.6,.5,sfxBus)},
+  bomb(){const t=now();
+    tone(900,t,.35,'square',.12,250);                 // fuse hiss falling
+    noise(t+.3,1.1,1.6,3000,'lowpass');               // blast
+    noise(t+.3,.5,.9,1200,'bandpass');                // crunch
+    tone(320,t+.3,.7,'triangle',.7,60);               // boom body
+    tone(160,t+.32,.8,'square',.25,45);
+    noise(t+.55,.6,.35,5000,'highpass')},             // debris crackle
+  zap(){const t=now();
+    noise(t,.08,1.2,4000,'highpass');                 // crack
+    tone(2200,t,.22,'sawtooth',.3,350);               // zip down
+    tone(1100,t+.02,.18,'square',.2,180);
+    noise(t+.05,.35,.8,1800,'bandpass')},             // rumble tail
+  rainbow(){if(!sfxOn)return;const t=now();
+    tone(500,t,.45,'sine',.35,1800);                  // whoosh up
+    [79,83,86,88,91,95,98].forEach((m,i)=>piano(m,t+.08+i*.06,.8,1.4,sfxBus));
+    tone(2600,t+.3,.6,'triangle',.12,4200)}
 };
+function noise(t,dur,vol,freq,type='lowpass'){
+  if(!AC||!sfxOn)return;
+  const len=Math.floor(AC.sampleRate*dur),b=AC.createBuffer(1,len,AC.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.2);
+  const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
+  s.buffer=b;f.type=type;f.frequency.value=freq;f.Q.value=type==='bandpass'?.8:.7;g.gain.value=vol;
+  s.connect(f).connect(g).connect(sfxBus);s.start(t);
+}
 function setToggle(btn,on){btn.setAttribute('aria-pressed',on)}
 $('musicBtn').onclick=()=>{initAudio();musicOn=!musicOn;setToggle($('musicBtn'),musicOn);
   try{localStorage.setItem('cl-music',musicOn?'1':'0')}catch(e){}
   if(!AC)return;if(musicOn)startBGM();else stopBGM()};
 $('sfxBtn').onclick=()=>{initAudio();sfxOn=!sfxOn;setToggle($('sfxBtn'),sfxOn);
   try{localStorage.setItem('cl-sfx',sfxOn?'1':'0')}catch(e){}
-  if(AC)sfxBus.gain.value=sfxOn?.6:0};
+  if(AC)sfxBus.gain.value=sfxOn?SFX_VOL:0};
 setToggle($('musicBtn'),musicOn);setToggle($('sfxBtn'),sfxOn);
-document.addEventListener('pointerdown',initAudio);
-document.addEventListener('keydown',initAudio);
-document.addEventListener('visibilitychange',()=>{if(!AC)return;if(document.hidden)AC.suspend();else AC.resume()});
+// Phones only allow sound after a real tap (touchend / click), not on pointerdown.
+// Resume the audio on every tap until it is running, and play one silent sample to unlock iOS.
+let unlocked=false;
+try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+function unlockAudio(){
+  initAudio();if(!AC)return;
+  if(AC.state!=='running')AC.resume().catch(()=>{});
+  if(!unlocked){
+    try{const b=AC.createBuffer(1,1,22050),s=AC.createBufferSource();s.buffer=b;s.connect(AC.destination);s.start(0)}catch(e){}
+    unlocked=true;
+  }
+  if(AC.state==='running'&&musicOn&&!bgmTimer)startBGM();
+}
+['touchend','pointerup','click','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{passive:true}));document.addEventListener('visibilitychange',()=>{if(!AC)return;if(document.hidden)AC.suspend();else AC.resume().catch(()=>{})});
 
 function onCell(i){
   if(busy||S.over)return;
@@ -372,11 +474,64 @@ function updateSides(){
 }
 function gameOver(){S.over=true;SFX.over();$('overScore').textContent=S.score;$('overBest').textContent='最高分 '+best;$('over').hidden=false}
 function seed(){for(let k=0;k<5;k++){const e=empties();S.grid[e[rand(e.length)]]=rand(COLORS.length)}}
-function newGame(){S=fresh();seed();sel=-1;busy=false;$('over').hidden=true;$('toast').hidden=true;drawAll();drawNext();updateSides()}
+function newGame(){S=fresh();seed();sel=-1;busy=false;$('over').hidden=true;$('toast').hidden=true;drawAll();drawNext();updateSides();drawPowers()}
 $('restart').onclick=newGame;$('again').onclick=newGame;
 
+/* ---------- Power-ups: bomb, lightning, rainbow (3 uses each) ---------- */
+function occupied(){const o=[];S.grid.forEach((v,i)=>{if(v>=0)o.push(i)});return o}
+function drawPowers(){
+  POWER_KEYS.forEach(k=>{
+    const b=$('pw-'+k),n=S.powers[k];
+    b.querySelector('.cnt').textContent=n;
+    b.classList.toggle('empty',n<=0);b.setAttribute('aria-disabled',n<=0);
+  });
+}
+function nope(b){b.classList.remove('nope');void b.offsetWidth;b.classList.add('nope');SFX.bad()}
+async function usePower(k){
+  const btn=$('pw-'+k);
+  unlockAudio();
+  if(busy||S.over)return;
+  if(S.powers[k]<=0||!occupied().length){nope(btn);return}
+  busy=true;
+  if(sel>=0){const s=sel;sel=-1;draw(s)}
+  S.powers[k]--;drawPowers();SFX.press();
+  if(k==='bomb'){
+    const occ=occupied(),c=occ[rand(occ.length)],r=c/N|0,cc=c%N,hit=[];
+    SFX.bomb();await sleep(300);
+    for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+      const nr=r+dr,nc=cc+dc;if(nr<0||nc<0||nr>=N||nc>=N)continue;
+      const i=nr*N+nc;cells[i].classList.remove('boom');void cells[i].offsetWidth;cells[i].classList.add('boom');
+      if(S.grid[i]>=0)hit.push(i);
+    }
+    hit.forEach(i=>cells[i].firstChild&&cells[i].firstChild.classList.add('vanish'));
+    await sleep(380);hit.forEach(i=>{S.grid[i]=-1;draw(i)});
+  }else if(k==='bolt'){
+    for(let n=0;n<3;n++){
+      const occ=occupied();if(!occ.length)break;
+      const i=occ[rand(occ.length)];
+      cells[i].classList.add('zap');SFX.zap();
+      await sleep(280);
+      cells[i].firstChild&&cells[i].firstChild.classList.add('vanish');
+      await sleep(180);S.grid[i]=-1;draw(i);cells[i].classList.remove('zap');
+      await sleep(140);
+    }
+  }else{
+    const occ=occupied();
+    for(let a=occ.length-1;a>0;a--){const b=rand(a+1);[occ[a],occ[b]]=[occ[b],occ[a]]}
+    const pick=occ.slice(0,5);SFX.rainbow();
+    for(const i of pick){
+      let c;do{c=rand(COLORS.length)}while(c===S.grid[i]&&COLORS.length>1);
+      S.grid[i]=c;draw(i,'spin');await sleep(70);
+    }
+    await sleep(450);
+    const L=linesAt(pick);if(L.rm.size)await clearSet(L.rm,L.pts);
+  }
+  busy=false;
+}
+POWER_KEYS.forEach(k=>$('pw-'+k).addEventListener('click',()=>usePower(k)));
+
 function start(data){
-  if(data&&data.S){S=data.S;drawAll();drawNext();updateSides();if(S.over)gameOver()}else newGame();
+  if(data&&data.S){S=data.S;if(!S.powers)S.powers=freshPowers();drawAll();drawNext();updateSides();drawPowers();if(S.over)gameOver()}else newGame();
 }
 window.claude?.hot?.snapshot?.(()=>({S}));
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
