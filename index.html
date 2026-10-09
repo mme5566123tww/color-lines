@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>平民逆襲 Color Lines</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Noto+Sans+TC:wght@400;700;900&display=swap">
+<style>
+/* Layout: three-lane stage — king's marble column | 9×9 tile board | commoner's stone column. Single night-courtyard look. */
+:root{
+  --bg:#18202f; --bg2:#232d42; --ink:#eef1f6; --muted:#9ba6bc;
+  --gold:#f2b705; --royal:#b3203a; --tile:#e7e9ec; --tile2:#d3d7dc; --grout:#a5acb6;
+  --display:"Lilita One","Noto Sans TC",system-ui,sans-serif;
+  --body:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+  --cw:clamp(44px,12vw,90px); --ch:calc(var(--cw)*1.25);
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);padding-inline:16px;padding-block:20px 32px;
+  background:radial-gradient(ellipse at 50% -10%,#33405e 0,var(--bg) 60%) var(--bg);min-height:100%}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{margin:0;font:900 clamp(22px,5vw,32px)/1.1 var(--body);text-align:center;text-wrap:balance;letter-spacing:.02em}
+h1 span{font-family:var(--display);font-weight:400;color:var(--gold);letter-spacing:.04em}
+.stage{display:grid;grid-template-columns:minmax(54px,120px) minmax(0,480px) minmax(54px,120px);gap:8px;justify-content:center}
+.hud{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.hud .who{font-size:12px;color:var(--muted);letter-spacing:.08em}
+.hud .num{font:400 clamp(18px,4.6vw,28px)/1 var(--display);font-variant-numeric:tabular-nums}
+.hud.king .num{color:#ff8a9a}
+.hud.me .num{color:#9ef0b0}
+.chip{font-size:10px;font-weight:700;background:var(--gold);color:#3a2a00;border-radius:99px;padding:1px 7px;letter-spacing:.06em}
+.nextbox{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:var(--muted)}
+.nextbox .ball{width:22px;flex:none}
+.lane{position:relative;min-width:0}
+.pillar{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:58%;
+  height:calc(12px + (100% - var(--ch) - 12px) * var(--p,0));
+  transition:height .7s cubic-bezier(.3,1.3,.5,1);border-radius:2px 2px 0 0}
+.pillar::before{content:"";position:absolute;left:-14%;right:-14%;top:-8px;height:10px;border-radius:3px}
+.king .pillar{background:
+  repeating-linear-gradient(90deg,rgba(255,255,255,.12) 0 3px,transparent 3px 9px),
+  linear-gradient(90deg,#6c6489,#a49cc4 45%,#5d567a)}
+.king .pillar::before{background:linear-gradient(#ffd75a,#c68d00)}
+.me .pillar{background:
+  repeating-linear-gradient(0deg,transparent 0 20px,rgba(0,0,0,.28) 20px 22px),
+  linear-gradient(90deg,#6b6153,#9b8f7c 45%,#5f5649)}
+.me .pillar::before{background:linear-gradient(#a99c86,#7a6f5e)}
+.char{position:absolute;left:50%;transform:translateX(-50%);width:var(--cw);height:var(--ch);
+  bottom:calc(12px + (100% - var(--ch) - 12px) * var(--p,0));transition:bottom .7s cubic-bezier(.3,1.3,.5,1)}
+.char svg{width:100%;height:100%;display:block;transform-origin:50% 100%;transition:transform .8s ease,filter .8s}
+.char.jump svg{animation:hop .45s ease}
+.char.hurt svg{animation:shake .4s ease}
+.char.fallen svg{transform:rotate(-78deg) translate(-10%,10%);filter:grayscale(.7)}
+@keyframes hop{40%{transform:translateY(-18%)}}
+@keyframes shake{20%{transform:translateX(-8%)}50%{transform:translateX(8%)}80%{transform:translateX(-4%)}}
+.float{position:absolute;left:50%;top:-6px;transform:translateX(-50%);font:400 20px/1 var(--display);pointer-events:none;
+  animation:rise 1.1s ease-out forwards;white-space:nowrap;text-shadow:0 2px 0 rgba(0,0,0,.5)}
+.float.up{color:#9ef0b0}.float.down{color:#ff8a9a}
+@keyframes rise{from{opacity:1;translate:0 0}to{opacity:0;translate:0 -46px}}
+.boardwrap{position:relative;min-width:0}
+.board{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;padding:4px;background:var(--grout);border-radius:10px;aspect-ratio:1;width:100%;max-width:100%;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.cell{border:0;padding:0;margin:0;border-radius:4px;background:linear-gradient(var(--tile),var(--tile2));display:grid;place-items:center;cursor:pointer;min-width:0;aspect-ratio:1}
+.cell:focus-visible{outline:3px solid var(--gold);outline-offset:-2px}
+.cell.no{animation:no .3s}
+@keyframes no{30%{background:#f4b6b6}}
+.ball{width:80%;aspect-ratio:1;border-radius:50%;display:block;
+  background:radial-gradient(circle at 34% 28%,#fff 0 7%,var(--c) 34%,var(--d) 100%);
+  box-shadow:0 2px 3px rgba(0,0,0,.35)}
+.ball.sel{animation:bounce .45s ease-in-out infinite alternate}
+.ball.pop{animation:pop .25s ease-out}
+.ball.vanish{animation:vanish .3s ease-in forwards}
+@keyframes bounce{to{transform:translateY(-14%) scale(1.04)}}
+@keyframes pop{from{transform:scale(.2)}}
+@keyframes vanish{to{transform:scale(1.5);opacity:0}}
+.toast{position:absolute;left:50%;top:12%;transform:translateX(-50%);background:var(--royal);color:#fff;font-weight:700;
+  padding:8px 14px;border-radius:8px;font-size:14px;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.over{position:absolute;inset:0;display:grid;place-items:center;background:rgba(15,20,32,.78);border-radius:10px}
+.over div{text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}
+.over b{font:400 44px/1 var(--display);color:var(--gold)}
+.bar{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 18px;font-size:13px;color:var(--muted)}
+button.btn{font:700 14px var(--body);background:var(--gold);color:#2e2200;border:0;border-radius:8px;padding:9px 18px;cursor:pointer}
+button.btn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+button.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid #4a5672;font-weight:500}
+button.btn.ghost[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+button.btn.ghost[aria-pressed="false"]{color:var(--muted);text-decoration:line-through}
+.help{max-width:62ch;margin:0 auto;text-align:center;font-size:13px;line-height:1.7;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>平民逆襲 <span>Color Lines</span></h1>
+
+  <div class="stage">
+    <div class="hud king"><span class="who">國王</span><span class="num" id="enemyNum">1000</span></div>
+    <div class="nextbox">下一組<span id="next" style="display:flex;gap:6px"></span></div>
+    <div class="hud me"><span class="who">平民（我）</span><span class="num" id="scoreNum">0</span><span class="chip" id="maxChip" hidden>MAX</span></div>
+
+    <div class="lane king" id="kingLane">
+      <div class="pillar"></div>
+      <div class="char" id="kingChar">
+        <svg viewBox="0 0 80 100" aria-label="國王">
+          <path d="M22 42 Q40 33 58 42 L68 97 L12 97 Z" fill="#b3203a"/>
+          <rect x="12" y="91" width="56" height="6" fill="#f6f2ea"/>
+          <g fill="#222"><circle cx="20" cy="94" r="1"/><circle cx="32" cy="94" r="1"/><circle cx="44" cy="94" r="1"/><circle cx="56" cy="94" r="1"/></g>
+          <path d="M29 46 L51 46 L56 91 L24 91 Z" fill="#5b2d92"/>
+          <rect x="26" y="64" width="28" height="4" fill="#f2b705"/>
+          <ellipse cx="40" cy="46" rx="15" ry="5" fill="#f6f2ea"/>
+          <g fill="#222"><circle cx="31" cy="46" r=".9"/><circle cx="40" cy="48" r=".9"/><circle cx="49" cy="46" r=".9"/></g>
+          <line x1="65" y1="26" x2="61" y2="86" stroke="#d9a300" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="65" cy="24" r="5" fill="#f2b705" stroke="#a87800"/>
+          <circle cx="65" cy="24" r="2" fill="#d42c4a"/>
+          <circle cx="62" cy="54" r="4" fill="#f2c9a0"/>
+          <circle cx="40" cy="31" r="11" fill="#f2c9a0"/>
+          <path d="M29 33 Q40 54 51 33 Q46 39 40 39 Q34 39 29 33 Z" fill="#f4f4f4"/>
+          <path d="M33 26 L38 28 M47 26 L42 28" stroke="#4a3020" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="36" cy="30" r="1.4" fill="#222"/><circle cx="44" cy="30" r="1.4" fill="#222"/>
+          <path d="M28 22 L28 10 L33.5 16 L40 6 L46.5 16 L52 10 L52 22 Z" fill="#f2b705" stroke="#a87800" stroke-width="1"/>
+          <circle cx="40" cy="17" r="2" fill="#d42c4a"/><circle cx="32" cy="19" r="1.4" fill="#2c6fe0"/><circle cx="48" cy="19" r="1.4" fill="#2fa84a"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="boardwrap">
+      <div class="board" id="board" role="grid" aria-label="9×9 棋盤"></div>
+      <div class="toast" id="toast" hidden></div>
+      <div class="over" id="over" hidden><div><span>棋盤滿了，遊戲結束</span><b id="overScore">0</b><span id="overBest"></span><button class="btn" id="again">再玩一次</button></div></div>
+    </div>
+
+    <div class="lane me" id="meLane">
+      <div class="pillar"></div>
+      <div class="char" id="meChar">
+        <svg viewBox="0 0 80 100" aria-label="平民">
+          <rect x="30" y="88" width="8" height="8" fill="#4a5a6a"/><rect x="42" y="88" width="8" height="8" fill="#4a5a6a"/>
+          <rect x="28" y="95" width="11" height="4" rx="2" fill="#3a2a1c"/><rect x="41" y="95" width="11" height="4" rx="2" fill="#3a2a1c"/>
+          <path d="M28 47 L52 47 L57 90 L23 90 Z" fill="#8a6a45"/>
+          <rect x="44" y="72" width="7" height="7" fill="#a98455" transform="rotate(8 47 75)"/>
+          <path d="M26 66 L54 66" stroke="#d9c08a" stroke-width="2.5"/>
+          <line x1="50" y1="56" x2="68" y2="22" stroke="#7a5230" stroke-width="3" stroke-linecap="round"/>
+          <path d="M60 18 Q69 10 75 20 Q70 28 62 25 Z" fill="#c9b48a" stroke="#8d7a52"/>
+          <circle cx="51" cy="55" r="4" fill="#f2c9a0"/>
+          <circle cx="23" cy="66" r="4" fill="#f2c9a0"/>
+          <circle cx="40" cy="34" r="11" fill="#f2c9a0"/>
+          <path d="M28 30 Q38 14 54 27 L53 31 Q41 25 29 32 Z" fill="#6b8f5e"/>
+          <circle cx="36" cy="34" r="1.4" fill="#222"/><circle cx="44" cy="34" r="1.4" fill="#222"/>
+          <path d="M36 39 Q40 42 44 39" stroke="#7a3a2a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+          <circle cx="33" cy="38" r="1.6" fill="#f0a08a" opacity=".7"/><circle cx="47" cy="38" r="1.6" fill="#f0a08a" opacity=".7"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar"><button class="btn" id="restart">重新開始</button><button class="btn ghost" id="musicBtn" aria-pressed="true">♪ 鋼琴音樂</button><button class="btn ghost" id="sfxBtn" aria-pressed="true">音效</button><span>最高分 <b id="best">0</b></span></div>
+  <p class="help">點一顆球選取，再點一個空格，球會沿著通路移動。橫、直、斜任一方向連成 5 顆就會消除：5 顆 +10、6 顆 +20、7 顆 +30。每得一分，平民的柱子升高（100 分升到頂），國王的分數同時扣掉並往下掉。沒有連線的話，會再落下 3 顆新球，棋盤滿了就結束。點一下棋盤，鋼琴音樂就會開始播放。</p>
+</div>
+
+<script>
+const N=9;
+const COLORS=[['#ef4444','#8f1414'],['#facc15','#a07a00'],['#3b82f6','#163f9a'],['#22c55e','#0f6a2c'],['#a855f7','#5b1d9a'],['#22d3ee','#0b7584']];
+const NAMES=['紅','黃','藍','綠','紫','青'];
+const $=id=>document.getElementById(id);
+const boardEl=$('board'),cells=[];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let S,sel=-1,busy=false,best=0;
+try{best=+localStorage.getItem('cl-best')||0}catch(e){}
+
+for(let i=0;i<N*N;i++){
+  const b=document.createElement('button');
+  b.className='cell';b.id='c'+i;b.setAttribute('aria-label',`第${(i/N|0)+1}列第${i%N+1}格`);
+  b.addEventListener('click',()=>onCell(i));
+  boardEl.appendChild(b);cells.push(b);
+}
+const rand=n=>Math.floor(Math.random()*n);
+const rand3=()=>[rand(COLORS.length),rand(COLORS.length),rand(COLORS.length)];
+function fresh(){return{grid:Array(N*N).fill(-1),next:rand3(),score:0,enemy:1000,over:false,fallen:false}}
+function ballHTML(c,cls=''){const[a,d]=COLORS[c];return`<span class="ball ${cls}" style="--c:${a};--d:${d}" aria-label="${NAMES[c]}球"></span>`}
+function draw(i,cls){const c=S.grid[i];cells[i].innerHTML=c<0?'':ballHTML(c,cls)}
+function drawAll(){for(let i=0;i<N*N;i++)draw(i,i===sel?'sel':'')}
+function drawNext(){$('next').innerHTML=S.next.map(c=>ballHTML(c)).join('')}
+function empties(){const e=[];S.grid.forEach((v,i)=>{if(v<0)e.push(i)});return e}
+
+function findPath(a,b){
+  const prev=new Int16Array(N*N).fill(-2);prev[a]=-1;const q=[a];
+  while(q.length){
+    const x=q.shift();if(x===b)break;const r=x/N|0,c=x%N;
+    for(const[dr,dc]of[[1,0],[-1,0],[0,1],[0,-1]]){
+      const nr=r+dr,nc=c+dc;if(nr<0||nc<0||nr>=N||nc>=N)continue;
+      const y=nr*N+nc;if(prev[y]!==-2||S.grid[y]>=0)continue;prev[y]=x;q.push(y);
+    }
+  }
+  if(prev[b]===-2)return null;
+  const p=[];for(let x=b;x!==a;x=prev[x])p.push(x);return p.reverse();
+}
+
+function linesAt(idxs){
+  const rm=new Set(),seen=new Set();let pts=0;
+  for(const i of idxs){
+    const col=S.grid[i];if(col<0)continue;const r=i/N|0,c=i%N;
+    for(const[dr,dc]of[[0,1],[1,0],[1,1],[1,-1]]){
+      const run=[i];
+      for(const s of[1,-1]){let nr=r+dr*s,nc=c+dc*s;
+        while(nr>=0&&nc>=0&&nr<N&&nc<N&&S.grid[nr*N+nc]===col){run.push(nr*N+nc);nr+=dr*s;nc+=dc*s}}
+      if(run.length>=5){
+        const key=dr+','+dc+','+Math.min(...run);
+        if(seen.has(key))continue;seen.add(key);
+        run.forEach(x=>rm.add(x));pts+=(run.length-4)*10;
+      }
+    }
+  }
+  return{rm,pts};
+}
+
+/* ---------- Audio: synthesized piano BGM + sound effects (Web Audio, no files) ---------- */
+let AC=null,master,musicBus,sfxBus,bgmTimer=null,nextT=0,stepN=0,lastMel=76;
+let musicOn=true,sfxOn=true;
+try{musicOn=localStorage.getItem('cl-music')!=='0';sfxOn=localStorage.getItem('cl-sfx')!=='0'}catch(e){}
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+function impulse(sec){
+  const len=AC.sampleRate*sec,b=AC.createBuffer(2,len,AC.sampleRate);
+  for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
+  return b;
+}
+function initAudio(){
+  if(AC){if(AC.state==='suspended')AC.resume();return}
+  const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+  AC=new C();
+  master=AC.createGain();master.gain.value=.85;
+  const comp=AC.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=3;
+  master.connect(comp).connect(AC.destination);
+  const rev=AC.createConvolver();rev.buffer=impulse(3);
+  const revOut=AC.createGain();revOut.gain.value=.5;rev.connect(revOut).connect(master);
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2400;lp.Q.value=.3;
+  musicBus=AC.createGain();musicBus.gain.value=musicOn?.5:0;
+  musicBus.connect(lp);lp.connect(master);
+  const mSend=AC.createGain();mSend.gain.value=.55;lp.connect(mSend).connect(rev);
+  sfxBus=AC.createGain();sfxBus.gain.value=sfxOn?.6:0;sfxBus.connect(master);
+  const sSend=AC.createGain();sSend.gain.value=.25;sfxBus.connect(sSend).connect(rev);
+  if(musicOn)startBGM();
+}
+// soft piano: a few slightly inharmonic sine partials with a hammer-like attack and natural decay
+function piano(m,t,vel,dur,bus){
+  if(!AC)return;const f=mtof(m);
+  const amps=[1,.42,.2,.09,.04];
+  const bright=Math.max(.35,1-(m-60)/60);
+  amps.forEach((a,k)=>{
+    const n=k+1,o=AC.createOscillator(),g=AC.createGain();
+    o.type='sine';o.frequency.value=f*n*(1+.00035*n*n);
+    if(k===0)o.detune.value=(Math.random()-.5)*4;
+    const peak=vel*a*(k?bright:1)*.35,dec=dur/(1+.7*k);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+.006);
+    g.gain.exponentialRampToValueAtTime(peak*.35,t+.006+Math.min(.25,dec*.15));
+    g.gain.exponentialRampToValueAtTime(.0001,t+dec);
+    o.connect(g).connect(bus);o.start(t);o.stop(t+dec+.05);
+  });
+}
+function tone(f,t,dur,type,vol,f2){
+  if(!AC||!sfxOn)return;
+  const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,t);
+  if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g).connect(sfxBus);o.start(t);o.stop(t+dur+.05);
+}
+// Gentle 8-bar progression: Cmaj7 Am7 Fmaj7 G | Em7 Am7 Dm7 Gsus4
+const PROG=[
+  [36,[60,64,67,71],[72,74,76,79]],[33,[57,60,64,67],[72,76,79,81]],
+  [41,[53,57,60,64],[69,72,76,77]],[43,[55,59,62,67],[71,74,79]],
+  [40,[55,59,62,64],[71,74,76,79]],[45,[57,60,64,67],[72,76,79,81]],
+  [38,[53,57,60,62],[69,72,74,77]],[43,[55,60,62,67],[72,74,79]]
+];
+const ARP=[0,1,2,3,2,1,2,3],EIGHTH=60/66/2;
+function playStep(t){
+  const bar=PROG[Math.floor(stepN/8)%PROG.length],s=stepN%8,h=()=> (Math.random()-.5)*.012;
+  if(s===0){piano(bar[0],t,.42,4.5,musicBus);piano(bar[0]+12,t+.01,.22,4,musicBus)}
+  piano(bar[1][ARP[s]],t+h(),s===0?.24:.16+Math.random()*.05,2.6,musicBus);
+  const want=(s===0)||(s===3&&Math.random()<.45)||(s===4&&Math.random()<.7)||(s===6&&Math.random()<.35);
+  if(want&&!(Math.floor(stepN/8)%PROG.length===7&&s>4)){
+    const pool=bar[2].slice().sort((a,b)=>Math.abs(a-lastMel)-Math.abs(b-lastMel));
+    const m=pool[Math.floor(Math.random()*Math.min(3,pool.length))];lastMel=m;
+    piano(m,t+.02+h(),.34+Math.random()*.08,3.2,musicBus);
+  }
+  stepN++;
+}
+function startBGM(){
+  if(!AC||bgmTimer)return;
+  nextT=AC.currentTime+.15;
+  musicBus.gain.cancelScheduledValues(AC.currentTime);
+  musicBus.gain.setValueAtTime(0,AC.currentTime);musicBus.gain.linearRampToValueAtTime(.5,AC.currentTime+1.5);
+  bgmTimer=setInterval(()=>{while(nextT<AC.currentTime+.3){playStep(nextT);nextT+=EIGHTH}},60);
+}
+function stopBGM(){
+  if(!AC)return;clearInterval(bgmTimer);bgmTimer=null;
+  musicBus.gain.cancelScheduledValues(AC.currentTime);
+  musicBus.gain.setTargetAtTime(0,AC.currentTime,.25);
+}
+const now=()=>AC?AC.currentTime+.01:0;
+const SFX={
+  select(){if(sfxOn)piano(88,now(),.5,.7,sfxBus)},
+  step(){tone(1400,now(),.03,'sine',.03)},
+  bad(){const t=now();tone(200,t,.14,'triangle',.22,140);tone(160,t+.1,.2,'triangle',.22,110)},
+  spawn(){const t=now();[0,1,2].forEach(i=>tone(520+i*130,t+i*.07,.1,'sine',.12,780+i*130))},
+  clear(n){if(!sfxOn)return;const t=now(),sc=[72,74,76,79,81,84,86,88,91,93];
+    for(let k=0;k<Math.min(n,sc.length);k++)piano(sc[k],t+k*.055,.55,1.3,sfxBus);
+    tone(2400,t+.05,.25,'sine',.05,3600)},
+  hurt(){const t=now()+.25;tone(260,t,.4,'triangle',.22,95);tone(130,t,.4,'sine',.18,60)},
+  fall(){const t=now()+.3;tone(700,t,1.1,'triangle',.18,80);tone(70,t+1,.6,'sine',.4,40)},
+  max(){if(!sfxOn)return;const t=now()+.2;[72,76,79,84].forEach((m,i)=>piano(m,t+i*.09,.6,2,sfxBus))},
+  over(){if(!sfxOn)return;const t=now();[69,65,62,57].forEach((m,i)=>piano(m,t+i*.35,.5,2.2,sfxBus))}
+};
+function setToggle(btn,on){btn.setAttribute('aria-pressed',on)}
+$('musicBtn').onclick=()=>{initAudio();musicOn=!musicOn;setToggle($('musicBtn'),musicOn);
+  try{localStorage.setItem('cl-music',musicOn?'1':'0')}catch(e){}
+  if(!AC)return;if(musicOn)startBGM();else stopBGM()};
+$('sfxBtn').onclick=()=>{initAudio();sfxOn=!sfxOn;setToggle($('sfxBtn'),sfxOn);
+  try{localStorage.setItem('cl-sfx',sfxOn?'1':'0')}catch(e){}
+  if(AC)sfxBus.gain.value=sfxOn?.6:0};
+setToggle($('musicBtn'),musicOn);setToggle($('sfxBtn'),sfxOn);
+document.addEventListener('pointerdown',initAudio);
+document.addEventListener('keydown',initAudio);
+document.addEventListener('visibilitychange',()=>{if(!AC)return;if(document.hidden)AC.suspend();else AC.resume()});
+
+function onCell(i){
+  if(busy||S.over)return;
+  if(S.grid[i]>=0){
+    const old=sel;sel=(sel===i)?-1:i;
+    if(old>=0)draw(old);if(sel>=0){draw(sel,'sel');SFX.select()}return;
+  }
+  if(sel<0)return;
+  const p=findPath(sel,i);
+  if(!p){cells[i].classList.remove('no');void cells[i].offsetWidth;cells[i].classList.add('no');SFX.bad();return}
+  const from=sel;sel=-1;move(from,p);
+}
+async function move(from,p){
+  busy=true;const col=S.grid[from];let prev=from;
+  for(const x of p){S.grid[prev]=-1;draw(prev);S.grid[x]=col;draw(x);prev=x;SFX.step();await sleep(28)}
+  const L=linesAt([prev]);
+  if(L.rm.size)await clearSet(L.rm,L.pts);else await spawn();
+  busy=false;
+}
+async function spawn(){
+  const placed=[];
+  for(const col of S.next){const e=empties();if(!e.length)break;const i=e[rand(e.length)];S.grid[i]=col;draw(i,'pop');placed.push(i)}
+  if(placed.length)SFX.spawn();
+  S.next=rand3();drawNext();await sleep(230);
+  const L=linesAt(placed);if(L.rm.size)await clearSet(L.rm,L.pts);
+  if(!empties().length)gameOver();
+}
+async function clearSet(rm,pts){
+  rm.forEach(i=>cells[i].firstChild&&cells[i].firstChild.classList.add('vanish'));
+  SFX.clear(rm.size);
+  await sleep(300);rm.forEach(i=>{S.grid[i]=-1;draw(i)});award(pts);
+}
+function award(pts){
+  const before=S.enemy;S.score+=pts;S.enemy=Math.max(0,S.enemy-pts);
+  floatText($('meChar'),'+'+pts,'up');bump($('meChar'),'jump');
+  if(before>0){floatText($('kingChar'),'-'+(before-S.enemy),'down');bump($('kingChar'),'hurt')}
+  if(before>0&&S.enemy===0){S.fallen=true;toast('國王被推翻了！分數繼續累積');SFX.fall()}
+  else if(before>0)SFX.hurt();
+  if(S.score>=100&&S.score-pts<100)SFX.max();
+  if(S.score>best){best=S.score;try{localStorage.setItem('cl-best',best)}catch(e){}}
+  updateSides();
+}
+function floatText(el,t,cls){const s=document.createElement('span');s.className='float '+cls;s.textContent=t;el.appendChild(s);setTimeout(()=>s.remove(),1150)}
+function bump(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls)}
+let toastT;function toast(t){const el=$('toast');el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,2600)}
+function updateSides(){
+  $('meLane').style.setProperty('--p',Math.min(S.score,100)/100);
+  $('kingLane').style.setProperty('--p',S.enemy/1000);
+  $('scoreNum').textContent=S.score;$('enemyNum').textContent=S.enemy;
+  $('maxChip').hidden=S.score<100;
+  $('kingChar').classList.toggle('fallen',S.fallen);
+  $('best').textContent=best;
+}
+function gameOver(){S.over=true;SFX.over();$('overScore').textContent=S.score;$('overBest').textContent='最高分 '+best;$('over').hidden=false}
+function seed(){for(let k=0;k<5;k++){const e=empties();S.grid[e[rand(e.length)]]=rand(COLORS.length)}}
+function newGame(){S=fresh();seed();sel=-1;busy=false;$('over').hidden=true;$('toast').hidden=true;drawAll();drawNext();updateSides()}
+$('restart').onclick=newGame;$('again').onclick=newGame;
+
+function start(data){
+  if(data&&data.S){S=data.S;drawAll();drawNext();updateSides();if(S.over)gameOver()}else newGame();
+}
+window.claude?.hot?.snapshot?.(()=>({S}));
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+</script>
+</body>
+</html>
