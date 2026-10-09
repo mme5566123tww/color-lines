@@ -129,8 +129,64 @@ button.btn.ghost[aria-pressed="false"]{color:var(--muted);opacity:.5}
 @keyframes hit{15%{transform:translateX(-5%) rotate(-3deg);filter:brightness(1.8)}45%{transform:translateX(4%) rotate(2deg)}75%{transform:translateX(-2%)}}
 .boat.cheer svg{animation:cheer .45s ease}
 @keyframes cheer{30%{transform:translateY(-14%)}55%{transform:translateY(0)}72%{transform:translateY(-6%)}88%{transform:translateY(0)}}
+/* HP bar over the royal ship, EXP bar over the raft */
+.gauge{position:absolute;top:6%;z-index:5;width:40%;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.6)}
+.gauge.hp{left:3%}.gauge.exp{right:3%;width:38%}
+.gl{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-bottom:3px;font:700 10px/1 var(--body);letter-spacing:.04em;white-space:nowrap}
+.gl b{font:400 12px/1 var(--display);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.track{position:relative;height:10px;border-radius:5px;background:rgba(0,0,0,.5);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.28);overflow:hidden}
+.track i{position:absolute;left:0;top:0;bottom:0;width:var(--w,100%);border-radius:5px}
+.hp .gl span{color:#ffb3bd}.exp .gl span{color:#a8f0ff}
+.hp .fill{background:linear-gradient(#ff8a98,#d42c4a);transition:width .25s ease-out}
+.hp .lag{background:#ffe08a;transition:width .5s ease .25s}
+.exp .fill{background:linear-gradient(#a8f6ff,#1fa4d6);transition:width .35s ease-out;box-shadow:0 0 6px rgba(120,230,255,.6)}
+.exp.lvup .track{animation:lvup .7s ease}
+@keyframes lvup{30%{box-shadow:inset 0 0 0 1.5px #fff,0 0 12px 3px #ffe08a}}
+.hp.dead .gl{opacity:.6}
+/* ultimate skill: meteor arrow rain */
+.ult-btn{position:absolute;left:50%;top:4%;transform:translateX(-50%);z-index:6;width:48px;height:48px;border-radius:50%;padding:0;cursor:pointer;
+  border:2px solid #fff3c0;background:radial-gradient(circle at 35% 30%,#fff3b0,#ffb02e 45%,#d45a00);color:#5a2400;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font:900 9px/1 var(--body);
+  box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 14px 3px rgba(255,176,46,.55);transition:filter .3s,opacity .3s}
+.ult-btn svg{width:24px;height:24px;display:block}
+.ult-btn .cnt{position:absolute;top:-6px;right:-8px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#e0263f;color:#fff;
+  font:400 12px/20px var(--display);text-align:center;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.ult-btn.ready{animation:ultPulse 1.2s ease-in-out infinite}
+@keyframes ultPulse{50%{box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 24px 8px rgba(255,200,80,.85)}}
+.ult-btn.empty{filter:grayscale(1);opacity:.45;cursor:not-allowed}
+.ult-btn.empty .cnt{background:#6b6b6b}
+.ult-btn.nope{animation:shake .35s}
+.ult-btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.fx{position:absolute;inset:0;pointer-events:none;z-index:4}
+.ultflash{position:absolute;inset:-6px;border-radius:14px;z-index:3;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,214,90,.0) 30%,rgba(255,140,0,.45) 100%);animation:ultflash 1.6s ease forwards}
+@keyframes ultflash{0%{opacity:0}15%{opacity:1;box-shadow:0 0 30px 10px rgba(255,180,40,.7)}80%{opacity:.8}100%{opacity:0}}
+.ultname{position:absolute;left:50%;top:44%;z-index:6;pointer-events:none;white-space:nowrap;
+  font:400 30px/1 var(--display);letter-spacing:.06em;color:#fff3b0;
+  text-shadow:0 0 0 #000,0 3px 0 #b34700,0 0 18px rgba(255,160,0,.9),2px 2px 0 #5a2400,-2px -2px 0 #5a2400,2px -2px 0 #5a2400,-2px 2px 0 #5a2400;
+  animation:ultname 1.3s cubic-bezier(.2,.9,.3,1) forwards}
+.ultname small{display:block;font:900 13px/1.4 var(--body);letter-spacing:.3em;text-align:center;color:#ffe08a}
+@keyframes ultname{0%{transform:translate(-160%,-50%) skewX(-20deg);opacity:0}18%{transform:translate(-50%,-50%) skewX(-8deg);opacity:1}
+  28%{transform:translate(-50%,-50%) skewX(0) scale(1.08)}75%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(60%,-50%) skewX(-20deg);opacity:0}}
+.meteor{position:absolute;width:0;height:0;z-index:5;animation:fall .38s cubic-bezier(.5,0,1,1) forwards}
+.meteor i{position:absolute;left:-5px;bottom:0;width:10px;height:90px;border-radius:5px;transform-origin:50% 100%;transform:rotate(26.57deg);
+  background:linear-gradient(to bottom,rgba(255,140,0,0),rgba(255,170,40,.8) 60%,#fff3b0 92%,#fff 100%);filter:drop-shadow(0 0 6px #ffb02e)}
+@keyframes fall{from{transform:translate(120px,-240px);opacity:0}20%{opacity:1}to{transform:translate(0,0);opacity:1}}
+.burst{position:absolute;width:0;height:0;z-index:5}
+.burst .ring{position:absolute;left:-20px;top:-20px;width:40px;height:40px;border-radius:50%;border:3px solid #ffe08a;
+  box-shadow:0 0 12px #ffb02e,inset 0 0 10px #fff3b0;animation:ring .5s ease-out forwards}
+.burst .core{position:absolute;left:-22px;top:-22px;width:44px;height:44px;border-radius:50%;
+  background:radial-gradient(circle,#fff 0,#fff3b0 25%,rgba(255,150,0,.8) 50%,transparent 70%);animation:core .4s ease-out forwards}
+.burst b{position:absolute;left:-3px;top:-3px;width:6px;height:6px;border-radius:50%;background:var(--pc,#ffd75a);
+  box-shadow:0 0 6px var(--pc,#ffd75a);animation:shard .6s cubic-bezier(.2,.7,.4,1) forwards}
+@keyframes ring{from{transform:scale(.2);opacity:1}to{transform:scale(2.4);opacity:0}}
+@keyframes core{from{transform:scale(.3);opacity:1}to{transform:scale(1.6);opacity:0}}
+@keyframes shard{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.board.quake{animation:quake .35s ease}
+@keyframes quake{20%{transform:translate(-3px,2px)}40%{transform:translate(3px,-2px)}60%{transform:translate(-2px,-1px)}80%{transform:translate(1px,2px)}}
+.boardwrap.ultmode .cell{filter:brightness(.8) saturate(1.1)}
 /* happy sticker the commoner shows after a hit, like a chat-app sticker */
-.sticker{position:absolute;right:3%;top:5%;z-index:6;display:flex;align-items:center;gap:6px;padding:5px 11px 5px 5px;
+.sticker{position:absolute;right:3%;top:24%;z-index:6;display:flex;align-items:center;gap:6px;padding:5px 11px 5px 5px;
   background:#fff;border-radius:18px;box-shadow:0 0 0 2.5px #3a2a10,0 6px 14px rgba(0,0,0,.35);
   color:#3a2a10;font:900 15px/1 var(--body);white-space:nowrap;pointer-events:none;
   animation:sticker 1s cubic-bezier(.3,1.6,.5,1) forwards}
@@ -143,7 +199,7 @@ button.btn.ghost[aria-pressed="false"]{color:var(--muted);opacity:.5}
 .spark{position:absolute;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;z-index:4;pointer-events:none;
   background:radial-gradient(circle,#fff 0,#ffd75a 30%,rgba(255,120,0,.6) 55%,transparent 70%);animation:spark .3s ease-out forwards}
 @keyframes spark{from{transform:scale(.2);opacity:1}to{transform:scale(1.6);opacity:0}}
-.float{position:absolute;left:50%;top:-4px;transform:translateX(-50%);font:400 20px/1 var(--display);pointer-events:none;z-index:5;
+.float{position:absolute;left:50%;top:-4px;transform:translateX(-50%);font:400 17px/1 var(--display);pointer-events:none;z-index:5;
   animation:rise .8s ease-out forwards;white-space:nowrap;text-shadow:0 2px 0 rgba(0,0,0,.5)}
 .float.up{color:#9ef0b0}.float.down{color:#ff8a9a}
 @keyframes rise{from{opacity:1;translate:0 0}to{opacity:0;translate:0 -40px}}
@@ -159,10 +215,11 @@ button.btn.ghost[aria-pressed="false"]{color:var(--muted);opacity:.5}
   <div class="stage">
     <div class="hud king"><span class="who">國王</span><span class="num" id="enemyNum">1000</span></div>
     <div class="nextbox">下一組<span id="next" style="display:flex;gap:6px"></span></div>
-    <div class="hud me"><span class="who">平民（我）</span><span class="num" id="scoreNum">0</span><span class="chip" id="maxChip" hidden>MAX</span><span class="best">最高 <b id="best">0</b></span></div>
+    <div class="hud me"><span class="who">平民（我）</span><span class="num" id="scoreNum">0</span><span class="chip" id="maxChip" hidden>Lv.2</span><span class="best">最高 <b id="best">0</b></span></div>
 
     <div class="boardwrap">
       <div class="board" id="board" role="grid" aria-label="8×8 棋盤"></div>
+      <div class="fx" id="fx"></div>
       <div class="toast" id="toast" hidden></div>
       <div class="over" id="over" hidden><div><span>棋盤滿了，遊戲結束</span><b id="overScore">0</b><span id="overBest"></span><button class="btn" id="again">再玩一次</button></div></div>
     </div>
@@ -194,8 +251,21 @@ button.btn.ghost[aria-pressed="false"]{color:var(--muted);opacity:.5}
     </div>
 
     <div class="sea" id="sea">
-      <span class="vs" aria-hidden="true">VS</span>
+      <button class="ult-btn empty" id="ultBtn" aria-label="必殺技：流星箭雨（每升一級可用一次）" title="必殺技：流星箭雨">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <g stroke-linecap="round"><path d="M27 3 L12 22" stroke="#7a2e00" stroke-width="2.6"/><path d="M20 3 L7 19" stroke="#7a2e00" stroke-width="2.2" opacity=".85"/><path d="M29 11 L18 26" stroke="#7a2e00" stroke-width="2.2" opacity=".85"/></g>
+          <path d="M12 22 L8 27 L10.5 20.5 Z M7 19 L3.5 23.5 L5.5 17.6 Z M18 26 L14.5 30 L16.6 24.4 Z" fill="#fff" stroke="#7a2e00" stroke-width="1.2" stroke-linejoin="round"/>
+          <circle cx="9" cy="25" r="3.2" fill="#fff3b0" opacity=".8"/>
+        </svg>必殺<b class="cnt" id="ultCnt">0</b></button>
       <div class="wave back"></div>
+      <div class="gauge hp" id="hpGauge" role="img" aria-label="國王血量">
+        <div class="gl"><span>國王 HP</span><b id="hpText">1000/1000</b></div>
+        <div class="track"><i class="lag" id="hpLag"></i><i class="fill" id="hpFill"></i></div>
+      </div>
+      <div class="gauge exp" id="expGauge" role="img" aria-label="平民經驗值">
+        <div class="gl"><span id="lvText">Lv.1 EXP</span><b id="expText">0/100</b></div>
+        <div class="track"><i class="fill" id="expFill" style="--w:0%"></i></div>
+      </div>
 
       <div class="boat king" id="kingBoat"><div class="bob">
         <svg viewBox="0 0 160 130" aria-label="國王的船">
@@ -291,7 +361,7 @@ const rand=n=>Math.floor(Math.random()*n);
 const rand3=()=>[rand(COLORS.length),rand(COLORS.length),rand(COLORS.length)];
 const POWER_KEYS=['bomb','bolt','rainbow'];
 const freshPowers=()=>({bomb:3,bolt:3,rainbow:3});
-function fresh(){return{grid:Array(N*N).fill(-1),next:rand3(),score:0,enemy:1000,over:false,fallen:false,powers:freshPowers()}}
+function fresh(){return{grid:Array(N*N).fill(-1),next:rand3(),score:0,enemy:1000,over:false,fallen:false,powers:freshPowers(),skill:0}}
 function ballHTML(c,cls=''){const[a,d]=COLORS[c];return`<span class="ball ${cls}" style="--c:${a};--d:${d}" aria-label="${NAMES[c]}球"></span>`}
 function draw(i,cls){const c=S.grid[i];cells[i].innerHTML=c<0?'':ballHTML(c,cls)}
 function drawAll(){for(let i=0;i<N*N;i++)draw(i,i===sel?'sel':'')}
@@ -448,6 +518,15 @@ const SFX={
     tone(2200,t,.22,'sawtooth',.3,350);               // zip down
     tone(1100,t+.02,.18,'square',.2,180);
     noise(t+.05,.35,.8,1800,'bandpass')},             // rumble tail
+  ultCharge(){if(!sfxOn)return;const t=now();
+    tone(180,t,.7,'sawtooth',.18,1500);noise(t,.7,.6,1800,'bandpass');
+    [60,67,72,76,79,84].forEach((m,i)=>piano(m,t+.05+i*.07,.7,1.8,sfxBus));
+    tone(90,t+.6,.5,'triangle',.5,45)},
+  impact(k){if(!sfxOn)return;const t=now(),sc=[84,86,88,91,93,96,98,100];
+    noise(t,.35,1.1,2200,'bandpass');noise(t,.18,.6,6000,'highpass');
+    tone(520,t,.28,'triangle',.4,80);piano(sc[k%sc.length],t+.01,.55,.9,sfxBus)},
+  ultEnd(){if(!sfxOn)return;const t=now();
+    [72,76,79,84,88,91].forEach((m,i)=>piano(m,t+i*.05,.8,2.2,sfxBus));tone(1200,t,.6,'sine',.12,3600);noise(t,.9,.5,4000,'highpass')},
   rainbow(){if(!sfxOn)return;const t=now();
     tone(500,t,.45,'sine',.35,1800);                  // whoosh up
     [79,83,86,88,91,95,98].forEach((m,i)=>piano(m,t+.08+i*.06,.8,1.4,sfxBus));
@@ -520,18 +599,19 @@ async function award(pts){
   const before=S.enemy;S.score+=pts;S.enemy=Math.max(0,S.enemy-pts);
   if(S.score>best){best=S.score;try{localStorage.setItem('cl-best',best)}catch(e){}}
   const me=$('meBoat'),king=$('kingBoat');
-  floatText(me,'+'+pts,'up');
+  floatText(me,'+EXP '+pts,'up');
   $('scoreNum').textContent=S.score;$('best').textContent=best;
-  $('maxChip').hidden=S.score<100;me.classList.toggle('max',S.score>=100);
-  if(S.score>=100&&S.score-pts<100)SFX.max();
+  const lvUp=Math.floor(S.score/100)>Math.floor((S.score-pts)/100);
+  updateExp();
+  if(lvUp){SFX.max();bump($('expGauge'),'lvup');S.skill+=Math.floor(S.score/100)-Math.floor((S.score-pts)/100);drawSkill()}
   if(before>0){
     SFX.shoot();
     await shootArrow();
-    bump(king,'hit');floatText(king,'-'+(before-S.enemy),'down');
+    bump(king,'hit');floatText(king,'-HP '+(before-S.enemy),'down');updateHP();
     if(S.enemy===0){S.fallen=true;toast('國王的船沉了！分數繼續累積');SFX.fall()}
     else SFX.hurt();
   }
-  bump(me,'cheer');showSticker(pts,S.enemy===0&&before>0);
+  bump(me,'cheer');showSticker(pts,S.enemy===0&&before>0,lvUp);
   updateSides();
 }
 const FACES={
@@ -540,10 +620,11 @@ const FACES={
   star:'<path d="M17 14 l1.6 3.4 3.7.4-2.8 2.5.8 3.6-3.3-1.9-3.3 1.9.8-3.6-2.8-2.5 3.7-.4z M31 14 l1.6 3.4 3.7.4-2.8 2.5.8 3.6-3.3-1.9-3.3 1.9.8-3.6-2.8-2.5 3.7-.4z" fill="#ff9f1a" stroke="#3a2a10" stroke-width="1.3" stroke-linejoin="round"/><path d="M14 28 Q24 41 34 28 Z" fill="#c2412b" stroke="#3a2a10" stroke-width="2" stroke-linejoin="round"/>'
 };
 const CHEERS=[['grin','射中了！'],['wink','耶～'],['grin','讚啦！'],['wink','看招！'],['star','太神啦！']];
-function showSticker(pts,sunk){
+function showSticker(pts,sunk,lvUp){
   const sea=$('sea');sea.querySelectorAll('.sticker').forEach(s=>s.remove());
   let [face,text]=CHEERS[rand(CHEERS.length)];
   if(pts>=20){face='star';text=pts>=30?'超級大成功！':'大成功！'}
+  if(lvUp){face='star';text='升級啦！Lv.'+(Math.floor(S.score/100)+1)}
   if(sunk){face='star';text='國王下船啦！'}
   const el=document.createElement('div');el.className='sticker';
   el.innerHTML=`<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="25" r="21" fill="#ffd54a" stroke="#3a2a10" stroke-width="2.5"/><circle cx="10.5" cy="29" r="3.4" fill="#ff9a9a" opacity=".85"/><circle cx="37.5" cy="29" r="3.4" fill="#ff9a9a" opacity=".85"/>${FACES[face]}</svg><span>${text}</span>`;
@@ -575,17 +656,29 @@ function spark(x,y){const s=document.createElement('div');s.className='spark';s.
 function floatText(el,t,cls){const s=document.createElement('span');s.className='float '+cls;s.textContent=t;el.appendChild(s);setTimeout(()=>s.remove(),850)}
 function bump(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls)}
 let toastT;function toast(t){const el=$('toast');el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,2600)}
+function updateHP(){
+  const w=(S.enemy/10)+'%';
+  $('hpFill').style.setProperty('--w',w);$('hpLag').style.setProperty('--w',w);
+  $('hpText').textContent=S.enemy+'/1000';$('enemyNum').textContent=S.enemy;
+  $('hpGauge').classList.toggle('dead',S.enemy===0);
+}
+function updateExp(){
+  const lv=Math.floor(S.score/100)+1,cur=S.score%100;
+  $('expFill').style.setProperty('--w',cur+'%');
+  $('expText').textContent=cur+'/100';$('lvText').textContent='Lv.'+lv+' EXP';
+  $('maxChip').textContent='Lv.'+lv;$('maxChip').hidden=lv<2;
+  $('meBoat').classList.toggle('max',lv>=2);
+}
 function updateSides(){
-  $('scoreNum').textContent=S.score;$('enemyNum').textContent=S.enemy;
-  $('maxChip').hidden=S.score<100;
-  $('meBoat').classList.toggle('max',S.score>=100);
+  $('scoreNum').textContent=S.score;
+  updateHP();updateExp();
   $('kingBoat').style.setProperty('--sink',(1-S.enemy/1000).toFixed(3));
   $('kingBoat').classList.toggle('fallen',S.fallen);
   $('best').textContent=best;
 }
 function gameOver(){S.over=true;SFX.over();$('overScore').textContent=S.score;$('overBest').textContent='最高分 '+best;$('over').hidden=false}
 function seed(){for(let k=0;k<5;k++){const e=empties();S.grid[e[rand(e.length)]]=rand(COLORS.length)}}
-function newGame(){S=fresh();seed();sel=-1;busy=false;$('over').hidden=true;$('toast').hidden=true;drawAll();drawNext();updateSides();drawPowers()}
+function newGame(){S=fresh();seed();sel=-1;busy=false;$('over').hidden=true;$('toast').hidden=true;drawAll();drawNext();updateSides();drawPowers();drawSkill()}
 $('restart').onclick=newGame;$('again').onclick=newGame;
 
 /* ---------- Power-ups: bomb, lightning, rainbow (3 uses each) ---------- */
@@ -641,8 +734,65 @@ async function usePower(k){
 }
 POWER_KEYS.forEach(k=>$('pw-'+k).addEventListener('click',()=>usePower(k)));
 
+/* ---------- Ultimate: meteor arrow rain (one charge per level-up) ---------- */
+function drawSkill(){
+  const b=$('ultBtn'),n=S.skill||0;
+  $('ultCnt').textContent=n;b.classList.toggle('empty',n<=0);b.classList.toggle('ready',n>0);b.setAttribute('aria-disabled',n<=0);
+}
+function cellCenter(i){
+  const w=$('boardwrap')||document.querySelector('.boardwrap');
+  const wr=w.getBoundingClientRect(),r=cells[i].getBoundingClientRect();
+  return[r.left-wr.left+r.width/2,r.top-wr.top+r.height/2];
+}
+function burstAt(x,y){
+  const fx=$('fx'),b=document.createElement('div');b.className='burst';b.style.left=x+'px';b.style.top=y+'px';
+  let h='<span class="core"></span><span class="ring"></span>';
+  const pcs=['#fff3b0','#ffd75a','#ff9f1a','#ff6a3d','#ffffff'];
+  for(let k=0;k<12;k++){const a=Math.PI*2*k/12+Math.random()*.4,d=22+Math.random()*30;
+    h+=`<b style="--dx:${(Math.cos(a)*d).toFixed(1)}px;--dy:${(Math.sin(a)*d).toFixed(1)}px;--pc:${pcs[k%pcs.length]}"></b>`}
+  b.innerHTML=h;fx.appendChild(b);setTimeout(()=>b.remove(),700);
+}
+async function useSkill(){
+  const btn=$('ultBtn');unlockAudio();
+  if(busy||S.over)return;
+  if(!(S.skill>0)){nope(btn);return}
+  busy=true;if(sel>=0){const s0=sel;sel=-1;draw(s0)}
+  S.skill--;drawSkill();
+  const wrap=document.querySelector('.boardwrap'),fx=$('fx');
+  // pick 8–10 different cells anywhere on the board
+  const all=[...Array(N*N).keys()];
+  for(let a=all.length-1;a>0;a--){const b=rand(a+1);[all[a],all[b]]=[all[b],all[a]]}
+  const targets=all.slice(0,8+rand(3));
+  // wind-up: golden glow + title banner
+  wrap.classList.add('ultmode');
+  const fl=document.createElement('div');fl.className='ultflash';wrap.appendChild(fl);
+  const nm=document.createElement('div');nm.className='ultname';nm.innerHTML='流星箭雨！<small>必殺技</small>';wrap.appendChild(nm);
+  SFX.ultCharge();
+  await sleep(520);
+  let hit=0;const FALL=380,GAP=75;
+  targets.forEach((i,k)=>{
+    setTimeout(()=>{
+      const[x,y]=cellCenter(i);
+      const m=document.createElement('div');m.className='meteor';m.style.left=x+'px';m.style.top=y+'px';m.innerHTML='<i></i>';fx.appendChild(m);
+      setTimeout(()=>{
+        m.remove();burstAt(x,y);SFX.impact(k);
+        const bd=$('board');bd.classList.remove('quake');void bd.offsetWidth;bd.classList.add('quake');
+        cells[i].classList.remove('boom');void cells[i].offsetWidth;cells[i].classList.add('boom');
+        if(S.grid[i]>=0){hit++;cells[i].firstChild&&cells[i].firstChild.classList.add('vanish');
+          setTimeout(()=>{S.grid[i]=-1;draw(i)},260)}
+      },FALL);
+    },k*GAP);
+  });
+  await sleep(targets.length*GAP+FALL+320);
+  SFX.ultEnd();
+  setTimeout(()=>{fl.remove();nm.remove();wrap.classList.remove('ultmode')},900);
+  busy=false;
+  if(hit>0)award(hit);
+}
+$('ultBtn').addEventListener('click',useSkill);
+
 function start(data){
-  if(data&&data.S){S=data.S;if(!S.powers)S.powers=freshPowers();drawAll();drawNext();updateSides();drawPowers();if(S.over)gameOver()}else newGame();
+  if(data&&data.S){S=data.S;if(!S.powers)S.powers=freshPowers();if(S.skill==null)S.skill=0;drawAll();drawNext();updateSides();drawPowers();drawSkill();if(S.over)gameOver()}else newGame();
 }
 window.claude?.hot?.snapshot?.(()=>({S}));
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
